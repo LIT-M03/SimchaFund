@@ -1,0 +1,5 @@
+c:\users\alexfriedman\documents\visual studio 2013\Projects\MvcApplication12\SimchaFund.Data\bin\Debug\SimchaFund.Data.dll
+c:\users\alexfriedman\documents\visual studio 2013\Projects\MvcApplication12\SimchaFund.Data\bin\Debug\SimchaFund.Data.pdb
+c:\users\alexfriedman\documents\visual studio 2013\Projects\MvcApplication12\SimchaFund.Data\obj\Debug\SimchaFund.Data.dll
+c:\users\alexfriedman\documents\visual studio 2013\Projects\MvcApplication12\SimchaFund.Data\obj\Debug\SimchaFund.Data.pdb
+c:\users\alexfriedman\documents\visual studio 2013\Projects\MvcApplication12\SimchaFund.Data\obj\Debug\SimchaFund.Data.csprojResolveAssemblyReference.cache
