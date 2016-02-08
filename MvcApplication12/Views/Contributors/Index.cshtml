@@ -33,14 +33,14 @@
         {
             <tr>
                 <td>
-                    <a href="#" class="btn btn-success">Deposit</a>
+                    <a href="#" class="btn btn-success deposit-button" data-contribid="@contributor.Id">Deposit</a>
                 </td>
                 <td>@contributor.FirstName @contributor.LastName</td>
                 <td>
                     @contributor.CellNumber
                 </td>
                 <td>
-                    @contributor.Balance
+                    @contributor.Balance.ToString("C")
                 </td>
                 <td>
                     @if (contributor.AlwaysInclude)
@@ -57,7 +57,7 @@
     </table>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog">
+<div class="modal fade new-contrib" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -84,7 +84,7 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label>Initial Deposit</label>
-                            <input type="text" class="form-control" name="initial_deposit" placeholder="Initial Deposit">
+                            <input type="text" class="form-control" name="initialDeposit" placeholder="Initial Deposit">
                         </div>
                     </div>
                     <div class="row">
@@ -103,6 +103,34 @@
                         </div>
                     </div>
 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <input class="btn btn-primary" name="commit" type="submit" value="Save">
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade deposit" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Deposit for <span id="deposit-name"></span></h4>
+            </div>
+            <form method="POST" action="/contributors/deposit">
+                <input type="hidden" name="contributorId" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input class="form-control" name="amount" placeholder="Deposit Amount" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="text" name="date" class="form-control" id="datepicker">
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>

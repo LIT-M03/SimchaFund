@@ -23,12 +23,12 @@
         @foreach (Simcha simcha in Model.Simchas.OrderByDescending(s => s.Date))
         {
             <tr>
-                <td><a class="btn btn-primary" href="#">Contributions</a> </td>
+                <td><a class="btn btn-primary" href="/simchas/contributions?simchaid=@simcha.Id">Contributions</a> </td>
                 <td>@simcha.Name</td>
                 <td>
                     @simcha.ContributorAmount / @Model.TotalContributors
                 </td>
-                <td>@simcha.Total</td>
+                <td>@simcha.Total.ToString("C")</td>
                 <td>@simcha.Date.ToShortDateString()</td>
             </tr>
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace SimchaFund.Data
 {
@@ -96,12 +97,131 @@ namespace SimchaFund.Data
                     contributor.CellNumber = (string)reader["CellNumber"];
                     contributor.Date = (DateTime)reader["Date"];
                     contributor.AlwaysInclude = (bool)reader["AlwaysInclude"];
-                    SetContributorBalance(contributor);
+                    contributor.Balance = GetContributorBalance(contributor.Id);
                     contributors.Add(contributor);
                 }
             }
 
             return contributors;
+        }
+
+        public void AddDeposit(Deposit deposit)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"INSERT INTO Deposits (Date, Amount, ContributorId)
+                                     VALUES (@date, @amount, @contributorId)";
+                cmd.Parameters.AddWithValue("@date", deposit.Date);
+                cmd.Parameters.AddWithValue("@amount", deposit.Amount);
+                cmd.Parameters.AddWithValue("@contributorId", deposit.ContributorId);
+                connection.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public IEnumerable<SimchaContributor> GetSimchaContributors(int simchaId)
+        {
+            var simchaContributors = new List<SimchaContributor>();
+            using (var connection = new SqlConnection(_connectionString))
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"SELECT c.Id, c.FirstName, c.LastName, c.AlwaysInclude,
+                                    cb.Amount from Contributors c
+                                    LEFT JOIN Contributions cb
+                                    ON c.Id = cb.ContributorId
+                                    WHERE cb.SimchaId = @simchaId OR cb.SimchaId is NULL";
+                cmd.Parameters.AddWithValue("@simchaId", simchaId);
+                connection.Open();
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    SimchaContributor sc = new SimchaContributor();
+                    sc.FirstName = (string)reader["FirstName"];
+                    sc.LastName = (string)reader["LastName"];
+                    sc.ContributorId = (int)reader["Id"];
+                    object amount = reader["Amount"];
+                    if (amount != DBNull.Value)
+                    {
+                        sc.Amount = (decimal)amount;
+                    }
+                    sc.AlwaysInclude = (bool)reader["AlwaysInclude"];
+                    sc.Balance = GetContributorBalance(sc.ContributorId);
+                    simchaContributors.Add(sc);
+                }
+
+                return simchaContributors;
+            }
+        }
+
+        public IEnumerable<SimchaContributor> GetSimchaContributorsEasy(int simchaId)
+        {
+            IEnumerable<Contributor> contributors = GetContributors();
+            using (var connection = new SqlConnection(_connectionString))
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT * FROM Contributions WHERE SimchaId = @simchaId";
+                cmd.Parameters.AddWithValue("@simchaId", simchaId);
+                connection.Open();
+                var reader = cmd.ExecuteReader();
+                List<Contribution> contributions = new List<Contribution>();
+                while (reader.Read())
+                {
+                    Contribution contribution = new Contribution
+                    {
+                        Amount = (decimal)reader["Amount"],
+                        SimchaId = simchaId,
+                        ContributorId = (int)reader["ContributorId"]
+                    };
+                    contributions.Add(contribution);
+                }
+
+                List<SimchaContributor> result = new List<SimchaContributor>();
+                foreach (Contributor contributor in contributors)
+                {
+                    SimchaContributor sc = new SimchaContributor();
+                    sc.FirstName = contributor.FirstName;
+                    sc.LastName = contributor.LastName;
+                    sc.AlwaysInclude = contributor.AlwaysInclude;
+                    sc.ContributorId = contributor.Id;
+                    sc.Balance = contributor.Balance;
+                    Contribution contribution = contributions.FirstOrDefault(c => c.ContributorId == contributor.Id);
+                    if (contribution != null)
+                    {
+                        sc.Amount = contribution.Amount;
+                    }
+                    result.Add(sc);
+                }
+
+                return result;
+            }
+
+        }
+
+        public void UpdateSimchaContributions(int simchaId, IEnumerable<ContributionInclusion> contributors)
+        {
+            using(var connection = new SqlConnection(_connectionString))
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = "DELETE FROM Contributions WHERE SimchaId = @simchaId";
+                cmd.Parameters.AddWithValue("@simchaId", simchaId);
+
+                connection.Open();
+                cmd.ExecuteNonQuery();
+
+                cmd.Parameters.Clear();
+                cmd.CommandText = @"INSERT INTO Contributions (SimchaId, ContributorId, Amount)
+                                    VALUES (@simchaId, @contributorId, @amount)";
+                foreach (ContributionInclusion contributor in contributors.Where(c => c.Include))
+                {
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@simchaId", simchaId);
+                    cmd.Parameters.AddWithValue("@contributorId", contributor.ContributorId);
+                    cmd.Parameters.AddWithValue("@amount", contributor.Amount);
+                    cmd.ExecuteNonQuery();
+                }
+
+            }
         }
 
         private void SetSimchaTotals(Simcha simcha)
@@ -121,21 +241,21 @@ namespace SimchaFund.Data
             }
         }
 
-        private void SetContributorBalance(Contributor contributor)
+        private decimal GetContributorBalance(int contributorId)
         {
             using (var connection = new SqlConnection(_connectionString))
             using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
                 cmd.CommandText = "SELECT IsNull(SUM(Amount),0) FROM Deposits WHERE ContributorId = @contribId";
-                cmd.Parameters.AddWithValue("@contribId", contributor.Id);
+                cmd.Parameters.AddWithValue("@contribId", contributorId);
                 decimal depositTotal = (decimal)cmd.ExecuteScalar();
 
                 cmd.Parameters.Clear();
                 cmd.CommandText = "SELECT IsNull(SUM(Amount),0) FROM Contributions WHERE ContributorId = @contribId";
-                cmd.Parameters.AddWithValue("@contribId", contributor.Id);
+                cmd.Parameters.AddWithValue("@contribId", contributorId);
                 decimal contibutionsTotal = (decimal)cmd.ExecuteScalar();
-                contributor.Balance = depositTotal - contibutionsTotal;
+                return depositTotal - contibutionsTotal;
             }
         }
     }

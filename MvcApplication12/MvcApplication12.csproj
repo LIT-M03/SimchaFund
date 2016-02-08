@@ -131,6 +131,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ContributionsViewModel.cs" />
     <Compile Include="Models\ContributorsIndexViewModel.cs" />
     <Compile Include="Models\SimchaIndexViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -217,6 +218,7 @@
     <Content Include="Scripts\knockout-2.2.0.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\site-scripts\contributor-index.js" />
+    <Content Include="Scripts\site-scripts\simcha-contributions.js" />
     <Content Include="Scripts\site-scripts\simcha-index.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
@@ -232,6 +234,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Simchas\Index.cshtml" />
     <Content Include="Views\Contributors\Index.cshtml" />
+    <Content Include="Views\Simchas\Contributions.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

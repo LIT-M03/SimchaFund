@@ -12,9 +12,9 @@ namespace MvcApplication12.Controllers
     {
         public ActionResult Index()
         {
-            if (TempData["newContributorId"] != null)
+            if (TempData["Message"] != null)
             {
-                ViewBag.Message = "New Contributor Created! Id: " + TempData["newContributorId"];
+                ViewBag.Message = TempData["Message"];
             }
             var vm = new ContributorsIndexViewModel();
             var mgr = new SimchaFundManager(Properties.Settings.Default.ConStr);
@@ -22,13 +22,29 @@ namespace MvcApplication12.Controllers
             return View(vm);
         }
 
-
-        public ActionResult New(Contributor contributor)
+        [HttpPost]
+        public ActionResult New(Contributor contributor, decimal initialDeposit)
         {
             var mgr = new SimchaFundManager(Properties.Settings.Default.ConStr);
             mgr.AddContributor(contributor);
-            TempData["newContributorId"] = contributor.Id;
+            var deposit = new Deposit
+            {
+                Amount = initialDeposit,
+                ContributorId = contributor.Id,
+                Date = contributor.Date
+            };
+            mgr.AddDeposit(deposit);
+            TempData["Message"] = "New Contributor Created! Id: " + contributor.Id;
             return RedirectToAction("index");
+        }
+
+        [HttpPost]
+        public ActionResult Deposit(Deposit deposit)
+        {
+            var mgr = new SimchaFundManager(Properties.Settings.Default.ConStr);
+            mgr.AddDeposit(deposit);
+            TempData["Message"] = "Deposit of $" + deposit.Amount + " recorded successfully";
+            return RedirectToAction("Index");
         }
     }
 }
