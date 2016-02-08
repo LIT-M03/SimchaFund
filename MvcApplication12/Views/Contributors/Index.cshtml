@@ -50,7 +50,9 @@
                 </td>
                 <td>
                     <a href="#" class="btn btn-primary">Show History</a>
-                    <a href="#" class="btn btn-danger">Edit</a>
+                    <a href="#" data-first-name="@contributor.FirstName" data-last-name="@contributor.LastName"
+                       data-cell="@contributor.CellNumber" data-id="@contributor.Id" data-always-include="@contributor.AlwaysInclude" data-date="@contributor.Date" 
+                       class="btn btn-danger edit-contrib">Edit</a>
                 </td>
             </tr>
         }
@@ -82,7 +84,7 @@
                             <label>Cell Number</label>
                             <input class="form-control" id="contributor_cell_number" name="cellNumber" placeholder="Cell Number" type="text">
                         </div>
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-md-6" id="initialDepositDiv">
                             <label>Initial Deposit</label>
                             <input type="text" class="form-control" name="initialDeposit" placeholder="Initial Deposit">
                         </div>
@@ -95,7 +97,7 @@
                         <div class="checkbox">
                             <div class="col-md-6">
                                 <label for="contributor_always_include">
-                                    <input name="alwaysInclude" type="checkbox" value="true">
+                                    <input id="contributor_always_include" name="alwaysInclude" type="checkbox" value="true">
                                     Always Include
                                     <input name="alwaysInclude" type="hidden" value="false">
                                 </label>

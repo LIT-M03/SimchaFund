@@ -39,6 +39,15 @@ namespace MvcApplication12.Controllers
         }
 
         [HttpPost]
+        public ActionResult Edit(Contributor contributor)
+        {
+            var mgr = new SimchaFundManager(Properties.Settings.Default.ConStr);
+            mgr.UpdateContributor(contributor);
+            TempData["Message"] = "Contributor updated successfully";
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
         public ActionResult Deposit(Deposit deposit)
         {
             var mgr = new SimchaFundManager(Properties.Settings.Default.ConStr);

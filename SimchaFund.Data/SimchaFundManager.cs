@@ -79,6 +79,24 @@ namespace SimchaFund.Data
             }
         }
 
+        public void UpdateContributor(Contributor contributor)
+        {
+            using (var sqlConnection = new SqlConnection(_connectionString))
+            using (var cmd = sqlConnection.CreateCommand())
+            {
+                sqlConnection.Open();
+                cmd.CommandText = @"UPDATE Contributors SET FirstName = @firstName, LastName = @lastName, CellNumber = @cellNumber,
+                                    Date = @date, AlwaysInclude = @alwaysInclude WHERE Id = @id";
+                cmd.Parameters.AddWithValue("@firstName", contributor.FirstName);
+                cmd.Parameters.AddWithValue("@lastName", contributor.LastName);
+                cmd.Parameters.AddWithValue("@cellNumber", contributor.CellNumber);
+                cmd.Parameters.AddWithValue("@date", contributor.Date);
+                cmd.Parameters.AddWithValue("@alwaysInclude", contributor.AlwaysInclude);
+                cmd.Parameters.AddWithValue("@id", contributor.Id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public IEnumerable<Contributor> GetContributors()
         {
             var contributors = new List<Contributor>();
@@ -200,7 +218,7 @@ namespace SimchaFund.Data
 
         public void UpdateSimchaContributions(int simchaId, IEnumerable<ContributionInclusion> contributors)
         {
-            using(var connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             using (var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = "DELETE FROM Contributions WHERE SimchaId = @simchaId";
