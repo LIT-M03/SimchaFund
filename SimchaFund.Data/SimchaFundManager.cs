@@ -242,6 +242,56 @@ namespace SimchaFund.Data
             }
         }
 
+        public IEnumerable<Deposit> GetDepositsById(int contribId)
+        {
+            List<Deposit> deposits = new List<Deposit>();
+            using (var connection = new SqlConnection(_connectionString))
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT * FROM Deposits WHERE ContributorId = @contribId";
+                cmd.Parameters.AddWithValue("@contribId", contribId);
+                connection.Open();
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    Deposit deposit = new Deposit();
+                    deposit.Id = (int)reader["Id"];
+                    deposit.Amount = (decimal)reader["Amount"];
+                    deposit.Date = (DateTime)reader["Date"];
+                    deposits.Add(deposit);
+                }
+            }
+
+            return deposits;
+        }
+
+        public IEnumerable<Contribution> GetContributionsById(int contribId)
+        {
+            List<Contribution> contributions = new List<Contribution>();
+            using (var connection = new SqlConnection(_connectionString))
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"SELECT c.*, s.Name, s.Date FROM Contributions c 
+                                    JOIN Simchas s ON c.SimchaId = s.Id
+                                    WHERE c.ContributorId = @contribId";
+                cmd.Parameters.AddWithValue("@contribId", contribId);
+                connection.Open();
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var contribution = new Contribution();
+                    contribution.ContributorId = (int)reader["ContributorId"];
+                    contribution.Amount = (decimal)reader["Amount"];
+                    contribution.SimchaId = (int)reader["SimchaId"];
+                    contribution.SimchaName = (string) reader["Name"];
+                    contribution.Date = (DateTime) reader["Date"];
+                    contributions.Add(contribution);
+                }
+            }
+
+            return contributions;
+        }
+
         private void SetSimchaTotals(Simcha simcha)
         {
             using (var connection = new SqlConnection(_connectionString))

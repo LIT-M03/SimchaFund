@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common.EntitySql;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -55,5 +56,51 @@ namespace MvcApplication12.Controllers
             TempData["Message"] = "Deposit of $" + deposit.Amount + " recorded successfully";
             return RedirectToAction("Index");
         }
+
+        public ActionResult History(int contribId)
+        {
+            var mgr = new SimchaFundManager(Properties.Settings.Default.ConStr);
+            var deposits = mgr.GetDepositsById(contribId);
+            var contributions = mgr.GetContributionsById(contribId);
+
+            IEnumerable<Transaction> transactions = deposits.Select(d => new Transaction
+            {
+                Action = "Deposit",
+                Amount = d.Amount,
+                Date = d.Date
+            }).Concat(contributions.Select(c => new Transaction
+            {
+                Action = "Contribution for the " + c.SimchaName + " simcha",
+                Amount = -c.Amount,
+                Date = c.Date
+            })).OrderByDescending(t => t.Date);
+
+            var vm = new HistoryViewModel();
+            vm.Transactions = transactions;
+
+            //List<string> st = new List<string>();
+            //st.Add("1");
+            //st.Add("10");
+            //st.Add("51");
+
+            //IEnumerable<int> nums = st.MySelect<string, int>(s => int.Parse(s));
+
+            return View(vm);
+        }
     }
+
+    //public static class MyExtensions
+    //{
+    //    public static IEnumerable<TResult> MySelect<TSource, TResult>(this IEnumerable<TSource> source,
+    //        Func<TSource, TResult> func)
+    //    {
+    //        List<TResult> result = new List<TResult>();
+    //        foreach (TSource obj in source)
+    //        {
+    //            result.Add(func(obj));
+    //        }
+
+    //        return result;
+    //    }
+    //}
 }
